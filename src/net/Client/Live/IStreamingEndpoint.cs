@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MediaServices.Client.Telemetry;
 
 namespace Microsoft.WindowsAzure.MediaServices.Client
 {
@@ -72,6 +73,26 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// Gets or sets if CDN to be enabled on this Streaming Endpoint.
         /// </summary>
         bool CdnEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets Cdn provider.
+        /// </summary>
+        string CdnProvider { get; set; }
+
+        /// <summary>
+        /// Gets or sets Cdn profile.
+        /// </summary>
+        string CdnProfile { get; set; }
+
+        /// <summary>
+        /// Gets or sets streaming endpoint version.
+        /// </summary>
+        string StreamingEndpointVersion { get; set; }
+
+        /// <summary>
+        /// Gets the free trial end time as a string.
+        /// </summary>
+        DateTime FreeTrialEndTime { get; }
 
         /// <summary>
         /// Gets or sets cross site access policies.
@@ -204,5 +225,11 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// </summary>
         /// <returns>Task to wait on for operation sending completion.</returns>
         Task<IOperation> SendScaleOperationAsync(int scaleUnits);
+
+        /// <summary>
+        /// Returns an object that can be queried to get streaming endpoint monitoring data.
+        /// </summary>
+        /// <returns>Returns instance of <see cref="StreamingEndpointTelemetryDataProvider"/>.</returns>
+        StreamingEndpointTelemetryDataProvider GetTelemetry();
     }
 }

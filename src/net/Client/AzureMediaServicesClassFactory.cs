@@ -21,8 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.Data.Services.Client;
 using System.Data.Services.Common;
+using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 
 
 namespace Microsoft.WindowsAzure.MediaServices.Client
@@ -32,15 +34,9 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
     /// </summary>
     public class AzureMediaServicesClassFactory : MediaServicesClassFactory
     {
-        /// <summary>
-        /// The certificate thumbprint for Nimbus services.
-        /// </summary>
-        internal const string NimbusRestApiCertificateThumbprint = "AC24B49ADEF9D6AA17195E041D3F8D07C88EC145";
-
-        /// <summary>
-        /// The certificate subject for Nimbus services.
-        /// </summary>
-        internal const string NimbusRestApiCertificateSubject = "CN=NimbusRestApi";
+        private static readonly Regex ValidAccountCustomHostExpression = new Regex(
+            @"^[a-z0-9]{3,24}\.restv2\.[^.]+\..+$",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private readonly Uri _azureMediaServicesEndpoint;
         private readonly OAuthDataServiceAdapter _dataServiceAdapter;
@@ -64,7 +60,7 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// <param name="mediaContext">The <seealso cref="CloudMediaContext" /> instance.</param>
         public AzureMediaServicesClassFactory(Uri azureMediaServicesEndpoint, CloudMediaContext mediaContext)
         {
-            _dataServiceAdapter = new OAuthDataServiceAdapter(mediaContext.Credentials, NimbusRestApiCertificateThumbprint, NimbusRestApiCertificateSubject);
+            _dataServiceAdapter = new OAuthDataServiceAdapter(mediaContext.TokenProvider);
             _serviceVersionAdapter = new ServiceVersionAdapter(KnownApiVersions.Current);
             _userAgentAdapter = new UserAgentAdapter(KnownClientVersions.Current);
             _mediaContext = mediaContext;
@@ -268,15 +264,25 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
 
         private Uri CreateAzureMediaServicesEndPoint(Uri azureMediaServicesEndpoint, MediaContextBase mediaContext)
         {
-            string cacheKey = string.Format(
-                "{0},{1}",
-                mediaContext.Credentials.ClientId,
-                azureMediaServicesEndpoint.ToString());
+            var cacheKey = String.Empty;
+            if (IsAccountCustomHost(azureMediaServicesEndpoint.Host))
+            {
+                cacheKey = azureMediaServicesEndpoint.ToString();
+            }
+            else
+            {
+                throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, StringTable.InvalidAzureMediaServicesEndpoint));
+            }
 
             return (_endpointCache.GetOrAdd(
                 cacheKey,
                 () => GetAccountApiEndpoint(_dataServiceAdapter, _serviceVersionAdapter, azureMediaServicesEndpoint, _userAgentAdapter, CreateClientRequestIdAdapter()),
-                () => mediaContext.Credentials.TokenExpiration));
+                () => mediaContext.TokenProvider.GetAccessToken().Item2.DateTime));
+        }
+
+        private static bool IsAccountCustomHost(string host)
+        {
+            return !string.IsNullOrWhiteSpace(host) && ValidAccountCustomHostExpression.IsMatch(host);
         }
     }
 }

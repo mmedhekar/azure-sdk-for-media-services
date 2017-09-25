@@ -20,6 +20,8 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MediaServices.Client.Properties;
+using Microsoft.WindowsAzure.MediaServices.Client.Telemetry;
+using Microsoft.WindowsAzure.MediaServices.Client.TransientFaultHandling;
 
 namespace Microsoft.WindowsAzure.MediaServices.Client
 {
@@ -28,6 +30,7 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
     {
         private StreamingEndpointAccessControl _accessControl;
         private StreamingEndpointCacheControl _cacheControl;
+        private string _cdnProvider;
 
         protected override string EntitySetName { get { return StreamingEndpointBaseCollection.StreamingEndpointSet; } }
 
@@ -75,6 +78,42 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// Gets or sets if CDN to be enabled on this Streaming Endpoint.
         /// </summary>
         public bool CdnEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets Cdn provider
+        /// </summary>
+        public string CdnProvider
+        {
+            get
+            {
+                return _cdnProvider;
+            }
+            set
+            {
+                Live.CdnProviderType cdnProvider;
+                if (value != null && !Enum.TryParse(value, true, out cdnProvider))
+                {
+                    throw new ArgumentException("Not a valid CDN provider");
+                }
+
+                _cdnProvider = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets Cdn Profile
+        /// </summary>
+        public string CdnProfile { get; set; }
+
+        /// <summary>
+        /// Gets or sets streaming endpoint version.
+        /// </summary>
+        public string StreamingEndpointVersion { get; set; }
+
+        /// <summary>
+        /// Gets the free trial end time.
+        /// </summary>
+        public DateTime FreeTrialEndTime { get; }
 
         /// <summary>
         /// Gets streaming endpoint state.
@@ -144,7 +183,19 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
             Description = options.Description;
             ScaleUnits = options.ScaleUnits;
             CdnEnabled = options.CdnEnabled;
+            CdnProfile = options.CdnProfile;
+            CdnProvider = options.CdnProvider.ToString();
+            StreamingEndpointVersion = options.StreamingEndpointVersion == null
+                ? StreamingEndpointCreationOptions.DefaultVersion.ToString()
+                : options.StreamingEndpointVersion.ToString();
             CrossSiteAccessPolicies = options.CrossSiteAccessPolicies;
+
+            // setting the state of the streaming endpoint
+            StreamingEndpointState streamingEndpointState = options.State == StreamingEndpointState.Running
+                ? options.State
+                : StreamingEndpointState.Stopped;
+
+            State = streamingEndpointState.ToString();
 
             if (options.CustomHostNames != null)
             {
@@ -346,6 +397,26 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         public Task<IOperation> SendScaleOperationAsync(int scaleUnits)
         {
             return Task.Factory.StartNew(() => SendScaleOperation(scaleUnits));
+        }
+
+        /// <summary>
+        /// Returns an object that can be queried to get streaming endpoint monitoring data.
+        /// </summary>
+        /// <returns>Returns instance of <see cref="StreamingEndpointTelemetryDataProvider"/>.</returns>
+        public StreamingEndpointTelemetryDataProvider GetTelemetry()
+        {
+            IMediaDataServiceContext dataContext = GetMediaContext().MediaServicesClassFactory.CreateDataServiceContext();
+
+            var monitoringConfig = GetMediaContext().MonitoringConfigurations.Single();
+            var notificationEndpoint = GetMediaContext().NotificationEndPoints.Where(n => n.Id == monitoringConfig.NotificationEndPointId).Single();
+
+            var streamingEndpointId = new Guid(Id.Split(':').Last());
+
+            var telemetryDataCache = new TelemetryDataCache((start, end) => notificationEndpoint.GetMonitoringSasUris(start, end));
+            return new StreamingEndpointTelemetryDataProvider(
+                streamingEndpointId,
+                telemetryDataCache,
+                new TelemetryStorage());
         }
 
         internal override void Refresh()

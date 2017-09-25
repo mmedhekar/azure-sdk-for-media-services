@@ -15,10 +15,6 @@
 // limitations under the License.
 // </license>
 
-//
-// DO NOT EDIT
-// This class is auto generated. Edit ODataClasses.tt
-//
 
 using System;
 
@@ -60,6 +56,11 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         }
         /// <include file='Documentation.xml' path='Documentation/Member[@name="IAsset.Options"]'/>
         AssetCreationOptions Options
+        {
+            get;
+        }
+
+        AssetFormatOption FormatOption
         {
             get;
         }
@@ -195,6 +196,12 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         }
         /// <include file='Documentation.xml' path='Documentation/Member[@name="IContentKey.Checksum"]'/>
         string Checksum
+        {
+            get;
+        }
+
+        /// <include file='Documentation.xml' path='Documentation/Member[@name="IContentKey.TrackIdentifiers"]'/>
+        string TrackIdentifiers
         {
             get;
         }

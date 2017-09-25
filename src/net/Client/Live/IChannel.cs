@@ -14,6 +14,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MediaServices.Client.Telemetry;
 
 namespace Microsoft.WindowsAzure.MediaServices.Client
 {
@@ -66,6 +67,11 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// Gets or sets the channel preview properties.
         /// </summary>
         ChannelPreview Preview { get; set; }
+
+        /// <summary>
+        /// Gets channel vanity url flag property.
+        /// </summary>
+        bool VanityUrl { get; }
 
         /// <summary>
         /// Gets or sets the channel output properties.
@@ -321,5 +327,11 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// <returns>Task to wait on for operation sending completion.</returns>
         /// <param name="cueId">The cue id of the ad marker to end.</param>
         Task<IOperation> SendEndAdvertisementOperationAsync(int cueId);
+
+        /// <summary>
+        /// Returns an object that can be queried to get channel monitoring data.
+        /// </summary>
+        /// <returns>Returns instance of <see cref="ChannelTelemetryDataProvider"/> </returns>
+        ChannelTelemetryDataProvider GetTelemetry();
     }
 }

@@ -15,6 +15,7 @@
 // </license>
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -199,6 +200,38 @@ namespace Microsoft.WindowsAzure.MediaServices.Client.Tests
         [TestCategory("ClientSDK")]
         [Owner("ClientSDK")]
         [TestCategory("Bvt")]
+        public void ShouldCreateContentKeyWithTrackIdentifers()
+        {
+            IContentKey key = null;
+            try
+            {
+                Guid keyId = Guid.NewGuid();
+                byte[] contentKeyBytes = GetRandomBuffer(16);
+
+                key = _mediaContext.ContentKeys.Create(
+                    keyId,
+                    contentKeyBytes,
+                    "TrackIdentifer",
+                    ContentKeyType.CommonEncryption,
+                    new List<string> {"mp4a", "aacl"});
+
+                string keyIdentifier = key.Id;
+
+                var createdKey =
+                    _mediaContext.ContentKeys.Where(k => k.Id.Equals(keyIdentifier, StringComparison.OrdinalIgnoreCase)).Single();
+
+                Assert.AreEqual(createdKey.TrackIdentifiers, "mp4a,aacl");
+            }
+            finally
+            {
+                key?.Delete();
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("ClientSDK")]
+        [Owner("ClientSDK")]
+        [TestCategory("Bvt")]
         public void ShouldDeleteContentKey()
         {
             Guid keyId = Guid.NewGuid();
@@ -212,6 +245,32 @@ namespace Microsoft.WindowsAzure.MediaServices.Client.Tests
             foreach (IContentKey contentKey in _mediaContext.ContentKeys)
             {
                 Assert.IsFalse(contentKey.Id == keyIdentifier);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("ClientSDK")]
+        [Owner("ClientSDK")]
+        [TestCategory("Bvt")]
+        public void ShouldCreateStorageEncryptionKey()
+        {
+            Guid keyId = Guid.NewGuid();
+            byte[] contentKeyBytes = GetRandomBuffer(32);
+
+            IContentKey key = null;
+            try
+            {
+                key = _mediaContext.ContentKeys.Create(keyId, contentKeyBytes, "TestStorageEncryptionKey", ContentKeyType.StorageEncryption);
+
+                Assert.IsTrue(contentKeyBytes.SequenceEqual(key.GetClearKeyValue()));
+                Assert.AreEqual(ContentKeyType.StorageEncryption, key.ContentKeyType);
+            }
+            finally
+            {
+                if (key != null)
+                {
+                    key.Delete();
+                }
             }
         }
 

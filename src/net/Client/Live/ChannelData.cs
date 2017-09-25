@@ -18,9 +18,13 @@ using System.Data.Services.Client;
 using System.Data.Services.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.WindowsAzure.MediaServices.Client.Properties;
+using Microsoft.WindowsAzure.MediaServices.Client.Telemetry;
 using Microsoft.WindowsAzure.MediaServices.Client.TransientFaultHandling;
 
 namespace Microsoft.WindowsAzure.MediaServices.Client
@@ -37,6 +41,8 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         private ProgramBaseCollection _programCollection;
 
         private ChannelEncoding _encoding;
+
+        private bool _vanityUrl;
 
         protected override string EntitySetName { get { return ChannelBaseCollection.ChannelSet; } }
 
@@ -71,7 +77,7 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         /// Gets state of the channel.
         /// </summary>
         ChannelState IChannel.State 
-        { 
+        {
             get 
             {
                 return (ChannelState)Enum.Parse(typeof(ChannelState), State, true);
@@ -170,6 +176,23 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         {
             get { return _encoding; }
             set { _encoding = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets channel vanity url flag property.
+        /// </summary>
+        public bool VanityUrl
+        {
+            get { return _vanityUrl; }
+            set { _vanityUrl = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the channel vanityUrl property.
+        /// </summary>
+        bool IChannel.VanityUrl
+        {
+            get { return _vanityUrl; }
         }
 
         /// <summary>
@@ -385,6 +408,26 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
             };
 
             return result;
+        }
+
+        /// <summary>
+        /// Returns an object that can be queried to get channel telemetry data.
+        /// </summary>
+        /// <returns>Returns instance of <see cref="ChannelTelemetryDataProvider"/> </returns>
+        public ChannelTelemetryDataProvider GetTelemetry()
+        {
+            IMediaDataServiceContext dataContext = GetMediaContext().MediaServicesClassFactory.CreateDataServiceContext();
+
+            var monitoringConfig = GetMediaContext().MonitoringConfigurations.Single();
+            var notificationEndpoint = GetMediaContext().NotificationEndPoints.Where(n => n.Id == monitoringConfig.NotificationEndPointId).Single();
+
+            var channelId = new Guid(Id.Split(':').Last());
+
+            var telemetryDataCache = new TelemetryDataCache((start, end) => notificationEndpoint.GetMonitoringSasUris(start, end));
+            return new ChannelTelemetryDataProvider(
+                channelId, 
+                telemetryDataCache,
+                new TelemetryStorage());
         }
 
         /// <summary>

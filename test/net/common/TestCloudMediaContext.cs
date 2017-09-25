@@ -21,23 +21,7 @@ namespace Microsoft.WindowsAzure.MediaServices.Client.Tests.Common
 {
     public class TestCloudMediaContext : CloudMediaContext
     {
-        public TestCloudMediaContext(string accountName, string accountKey) : base(accountName, accountKey)
-        {
-        }
-
-        public TestCloudMediaContext(Uri apiServer, string accountName, string accountKey) : base(apiServer, accountName, accountKey)
-        {
-        }
-
-        public TestCloudMediaContext(Uri apiServer, string accountName, string accountKey, string scope, string acsBaseAddress) : base(apiServer, accountName, accountKey, scope, acsBaseAddress)
-        {
-        }
-
-        public TestCloudMediaContext(MediaServicesCredentials credentials) : base(credentials)
-        {
-        }
-
-        public TestCloudMediaContext(Uri apiServer, MediaServicesCredentials credentials) : base(apiServer, credentials)
+        public TestCloudMediaContext(Uri apiServer, ITokenProvider tokenProvider) : base(apiServer, tokenProvider)
         {
         }
 

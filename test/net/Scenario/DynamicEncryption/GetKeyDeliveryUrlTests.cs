@@ -376,7 +376,7 @@ namespace Microsoft.WindowsAzure.MediaServices.Client.Tests
 
                 TokenRestrictionTemplate tokenRestrictionTemplate = new TokenRestrictionTemplate(TokenType.JWT);
                 tokenRestrictionTemplate.OpenIdConnectDiscoveryDocument = new OpenIdConnectDiscoveryDocument("https://login.windows.net/common/.well-known/openid-configuration");
-                var result = authContext.AcquireToken(appResourceId, clientCredential);
+                var result = authContext.AcquireTokenAsync(appResourceId, clientCredential).Result;
                 string jwtTokenString = result.AccessToken;
                 
                 JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
@@ -519,8 +519,6 @@ namespace Microsoft.WindowsAzure.MediaServices.Client.Tests
                 Uri keyDeliveryServiceUri = contentKey.GetKeyDeliveryUrl(ContentKeyDeliveryType.BaselineHttp);
 
                 Assert.IsNotNull(keyDeliveryServiceUri);
-
-                Assert.IsTrue(keyDeliveryServiceUri.Host.StartsWith(_mediaContext.Credentials.ClientId));
 
                 KeyDeliveryServiceClient keyClient = new KeyDeliveryServiceClient(RetryPolicy.DefaultFixed);
                 string swtTokenString = TokenRestrictionTemplateSerializer.GenerateTestToken(tokenRestrictionTemplate,

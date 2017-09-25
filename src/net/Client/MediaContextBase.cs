@@ -22,9 +22,9 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
     public abstract partial class MediaContextBase
     {
         /// <summary>
-        /// Gets Microsoft WindowsAzure Media Services credentials used for authenticating requests.
+        /// A token provider to get authorization tokens for Azure Media Services.
         /// </summary>
-        public MediaServicesCredentials Credentials { get; protected set; }
+        public ITokenProvider TokenProvider { get; set; }
 
         /// <summary>
         /// Gets a collection to operate on AccessPolicies.
@@ -110,6 +110,11 @@ namespace Microsoft.WindowsAzure.MediaServices.Client
         public abstract IngestManifestAssetCollection IngestManifestAssets { get; }
         public abstract LocatorBaseCollection Locators { get; }
         public abstract StreamingFilterBaseCollection Filters { get; }
+
+        /// <summary>
+        /// Gets the collection of monitoring configuration available in the system.
+        /// </summary>
+        public abstract MonitoringConfigurationCollection MonitoringConfigurations { get; }
 
         /// <summary>
         /// Gets or sets the number of threads to use to for each blob transfer.

@@ -174,6 +174,7 @@
   <ItemGroup>
     <Compile Include="Collections\AssetFilterBaseCollection.cs" />
     <Compile Include="Collections\EncodingReservedUnitCollection.cs" />
+    <Compile Include="Collections\TaskNotificationSubscriptionCollection.cs" />
     <Compile Include="Collections\StreamingFilterBaseCollection.cs" />
     <Compile Include="ContentKeyAuthorization\ContentKeyAuthorizationPolicyCollection.cs" />
     <Compile Include="ContentKeyAuthorization\ContentKeyAuthorizationPolicyData.cs" />
@@ -205,6 +206,7 @@
     <Compile Include="ContentKeyAuthorization\Templates\PlayReadyLicenseTemplate.cs" />
     <Compile Include="ContentKeyAuthorization\Templates\PlayReadyLicenseType.cs" />
     <Compile Include="ContentKeyAuthorization\Templates\PlayReadyPlayRight.cs" />
+    <Compile Include="ContentKeyAuthorization\Templates\RentalAndLeaseKeyType.cs" />
     <Compile Include="ContentKeyAuthorization\Templates\RSATokenVerificationKey.cs" />
     <Compile Include="ContentKeyAuthorization\Templates\ScmsRestriction.cs" />
     <Compile Include="ContentKeyAuthorization\Templates\SymmetricVerificationKey.cs" />
@@ -230,6 +232,7 @@
     <Compile Include="DynamicEncryption\OutputAsset.cs" />
     <Compile Include="Entities\AssetFileOptions.cs" />
     <Compile Include="Entities\AssetFilterData.cs" />
+    <Compile Include="Entities\AssetFormatOption.cs" />
     <Compile Include="Entities\EncodingReservedUnitData.cs" />
     <Compile Include="Entities\AccessPermissions.cs" />
     <Compile Include="Collections\AccessPolicyBaseCollection.cs">
@@ -284,7 +287,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Entities\FilterTrackCompareOperator.cs" />
+    <Compile Include="Entities\FirstQuality.cs" />
+    <Compile Include="Entities\FirstQualityData.cs" />
     <Compile Include="Entities\IEncodingReservedUnit.cs" />
+    <Compile Include="Entities\ITaskNotificationSubscription.cs" />
+    <Compile Include="Entities\NotificationEndpointCredentialType.cs" />
+    <Compile Include="Entities\TaskNotificationSubscription.cs" />
     <Compile Include="Live\AdMarkerSource.cs" />
     <Compile Include="Entities\IFilterTrackPropertyCondition.cs" />
     <Compile Include="Entities\IStreamingAssetFilter.cs" />
@@ -308,6 +316,7 @@
     <Compile Include="Live\AkamaiSignatureHeaderAuthenticationKey.cs" />
     <Compile Include="Live\AsyncHelper.cs" />
     <Compile Include="Live\AudioStream.cs" />
+    <Compile Include="Live\CdnProviderType.cs" />
     <Compile Include="Live\ChannelAccessControl.cs" />
     <Compile Include="Live\ChannelAccessControlData.cs" />
     <Compile Include="Live\ChannelBaseCollection.cs" />
@@ -357,13 +366,30 @@
     <Compile Include="Live\VideoStream.cs" />
     <Compile Include="MediaQueryable.cs" />
     <Compile Include="MediaQueryProvider.cs" />
-    <Compile Include="MediaServicesCredentials.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="Encryption\NullableFileEncryption.cs" />
+    <Compile Include="Telemetry\ChannelHeartbeat.cs" />
+    <Compile Include="Telemetry\ChannelTelemetryDataProvider.cs" />
+    <Compile Include="Telemetry\EnumerableExtensions.cs" />
+    <Compile Include="Telemetry\IChannelHeartbeat.cs" />
+    <Compile Include="Telemetry\IStreamingEndPointRequestLog.cs" />
     <Compile Include="RequestAdapters\IDataServiceContextAdapter.cs" />
     <Compile Include="RequestAdapters\AssetDeleteOptionsRequestAdapter.cs" />
     <Compile Include="RequestAdapters\IWebRequestAdapter.cs" />
     <Compile Include="ReservedUnitType.cs" />
+    <Compile Include="Telemetry\ComponentMonitoringSetting.cs" />
+    <Compile Include="Telemetry\IComponentMonitoringSetting.cs" />
+    <Compile Include="Telemetry\IMonitoringConfiguration.cs" />
+    <Compile Include="Telemetry\MonitoringComponent.cs" />
+    <Compile Include="Telemetry\MonitoringConfiguration.cs" />
+    <Compile Include="Telemetry\MonitoringConfigurationCollection.cs" />
+    <Compile Include="Telemetry\MonitoringLevel.cs" />
+    <Compile Include="Telemetry\MonitoringSasUri.cs" />
+    <Compile Include="Telemetry\StreamingEndPointRequestLog.cs" />
+    <Compile Include="Telemetry\StreamingEndpointTelemetryDataProvider.cs" />
+    <Compile Include="Telemetry\TelemetryDataCache.cs" />
+    <Compile Include="Telemetry\TelemetryStorage.cs" />
+    <Compile Include="Telemetry\TelemetryUtilities.cs" />
     <Compile Include="TransientFaultHandling\IRetryPolicyAdapter.cs" />
     <Compile Include="TransientFaultHandling\RetryPolicyExtensions.cs" />
     <Compile Include="TransientFaultHandling\StorageTransientErrorDetectionStrategy.cs" />
@@ -551,6 +577,10 @@
     <None Include="Settings.stylecop" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Common\Common.Authentication\SDK.Client.Common.Authentication.csproj">
+      <Project>{57005DBF-B478-4087-84DC-24441714D0F5}</Project>
+      <Name>SDK.Client.Common.Authentication</Name>
+    </ProjectReference>
     <ProjectReference Include="Common\Common.BlobTransfer\SDK.Client.Common.BlobTransfer.csproj">
       <Project>{f0c14570-44f9-4f3e-ac4f-d9965c4b1d06}</Project>
       <Name>SDK.Client.Common.BlobTransfer</Name>
